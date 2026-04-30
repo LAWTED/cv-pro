@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAnon } from "@/lib/supabase/client";
 import { createPat } from "@/lib/pat";
-import { SEED_RESUME } from "@/lib/seed";
 import type { ResumeData } from "@/types/resume";
 
 const RESERVED = new Set([
@@ -47,8 +46,15 @@ export async function POST(req: NextRequest) {
 
   // create empty resume
   const resume: ResumeData = {
-    ...SEED_RESUME,
     username: handle,
+    header: { name: "" },
+    personalInfo: { email: "" },
+    experience: [],
+    education: [],
+    projectsRecent: [],
+    projectsDetailed: [],
+    skills: [],
+    contact: [],
     meta: { updatedAt: new Date().toISOString(), version: 1 },
   };
 
