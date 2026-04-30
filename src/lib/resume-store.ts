@@ -1,6 +1,5 @@
 import "server-only";
 import { supabaseAnon } from "@/lib/supabase/client";
-import { SEED_RESUME } from "@/lib/seed";
 import type { ResumeData } from "@/types/resume";
 
 export async function getResumeByUsername(
@@ -18,8 +17,6 @@ export async function getResumeByUsername(
   } catch (err) {
     console.warn("[resume-store] unreachable:", err);
   }
-
-  if (username === SEED_RESUME.username) return SEED_RESUME;
   return null;
 }
 

@@ -10,7 +10,7 @@ function hashToken(token: string): string {
   return createHmac("sha256", secret).update(token).digest("hex");
 }
 
-export function generateRawToken(): string {
+function generateRawToken(): string {
   return PAT_PREFIX + randomBytes(24).toString("base64url");
 }
 
@@ -33,8 +33,8 @@ export async function createPat(
 
 export async function verifyPat(
   rawToken: string,
-): Promise<{ username: string; tokenId: string } | null> {
-  if (!rawToken || !rawToken.startsWith(PAT_PREFIX)) return null;
+): Promise<{ username: string } | null> {
+  if (!rawToken?.startsWith(PAT_PREFIX)) return null;
   const tokenHash = hashToken(rawToken);
   const { data, error } = await supabaseAnon
     .from("cv_pat_tokens")
@@ -49,5 +49,5 @@ export async function verifyPat(
     .eq("id", data.id)
     .then(() => undefined);
 
-  return { username: data.username, tokenId: data.id };
+  return { username: data.username };
 }

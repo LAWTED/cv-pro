@@ -1,39 +1,26 @@
 export interface WorkExperience {
   company: string;
-  companyVoice?: string;
   role: string;
-  roleVoice?: string;
   startDate: string;
   endDate: string;
-  dateVoice?: string;
-  stockSymbol?: string;
-  stockCurrency?: string;
-  stockVoice?: string;
 }
 
 export interface Education {
   school: string;
-  schoolVoice?: string;
   major: string;
-  majorVoice?: string;
   degree: string;
-  degreeVoice?: string;
   startDate: string;
   endDate: string;
-  dateVoice?: string;
 }
 
 export interface ProjectShort {
   title: string;
   description: string;
   url: string;
-  voice?: string;
-  image?: string;
 }
 
 export interface ProjectDetailed {
   title: string;
-  titleVoice?: string;
   type: string;
   startDate: string;
   endDate?: string;
@@ -45,7 +32,6 @@ export interface ProjectDetailed {
 
 export interface SkillCategory {
   name: string;
-  voice?: string;
   items: string[];
 }
 
@@ -56,13 +42,9 @@ export interface ContactLink {
 
 export interface PersonalInfo {
   pronouns?: string;
-  pronounsVoice?: string;
   mbti?: string;
-  mbtiVoice?: string;
   birthday?: string;
-  birthdayImage?: string;
   email: string;
-  emailVoice?: string;
 }
 
 export interface ResumeData {
