@@ -1,32 +1,51 @@
 ---
 name: cv
-description: Use when the user wants to publish, view, or edit their living resume at cv.ha7ch.com. Triggers on phrases like "update my resume", "publish my CV", "rewrite my experience at Stanford", or when the user drops a PDF asking to sync it to their cv page.
+description: Update, view, or edit the user's living resume at cv.ha7ch.com. Triggers on any resume-related request — attaching a PDF, pasting resume text, asking to edit an experience or section, or asking to view the current resume.
+allowed-tools: Bash(npx @lawtedwu/aicv@latest:*)
+argument-hint: "[section to update, or attach a PDF / paste resume text]"
 ---
 
-# cv — living resume on cv.ha7ch.com
+You are helping the user keep their living resume at cv.ha7ch.com up to date using the `aicv` CLI.
 
-You have access to the `cv` MCP server, which reads and writes the user's resume hosted at `cv.ha7ch.com/{handle}`. Their token is configured via the `CV_TOKEN` environment variable.
+## Preflight
 
-## When to use which tool
+Check that the CLI is available and the token is set:
 
-- **`get_resume`** — when the user asks "what's on my resume now" or you need the current state before edits.
-- **`update_resume`** — when the user drops a PDF. Read it natively via the Read tool, extract the ResumeData shape, call this tool.
-- **`update_section`** — for targeted conversational edits. Pass `{ section: "experience", value: <new array> }`. Valid sections: `header`, `personalInfo`, `experience`, `education`, `projectsRecent`, `projectsDetailed`, `skills`, `contact`.
-- **`list_versions`** — show history.
-- **`rollback`** — undo. Confirm version first.
+```bash
+CV_TOKEN=$CV_TOKEN npx @lawtedwu/aicv@latest --help
+```
 
-## Common flows
+If `CV_TOKEN` is not set, ask the user for their token (they can get one at cv.ha7ch.com) and prepend it to subsequent CLI calls.
 
-**PDF → resume**
-1. Read the PDF via Read tool.
-2. Extract every field into ResumeData. Omit missing fields rather than fabricating.
-3. Call `update_resume({ data })`.
-4. Reply: "Saved as v{N}. View at https://cv.ha7ch.com/{handle}."
+Fetch the current resume so you have context:
 
-**Conversational edit**
-1. `get_resume` for current state.
-2. Update the relevant section.
-3. `update_section({ section, value })`.
+```bash
+CV_TOKEN=$CV_TOKEN npx @lawtedwu/aicv@latest get
+```
 
-**If token missing/invalid**
-Tell user to register at `cv.ha7ch.com` and set `CV_TOKEN=cv_pat_...` in their shell.
+## Update
+
+Determine what the user wants to change based on `$ARGUMENTS` and any attached files or pasted content:
+
+- **PDF attached** — read the file, extract all resume fields that are present, call `npx aicv update` with the full extracted JSON.
+- **Text / paste** — parse the content, identify which sections it covers, call `npx aicv update-section` for each changed section.
+- **Conversational edit** ("rewrite my Alibaba bullet", "add a new project") — apply the edit to the relevant section from the fetched resume, then call `npx aicv update-section`.
+- **Unclear** — ask one brief clarifying question before proceeding.
+
+Sections: `header`, `personalInfo`, `experience`, `education`, `projectsRecent`, `projectsDetailed`, `skills`, `contact`.
+
+## Verify
+
+After updating, confirm success and show the live URL:
+
+```bash
+CV_TOKEN=$CV_TOKEN npx @lawtedwu/aicv@latest whoami
+```
+
+Tell the user their page URL: `https://cv.ha7ch.com/{handle}`
+
+## Notes
+
+- The CLI reads `CV_TOKEN` from the environment. Always prepend it: `CV_TOKEN=... npx @lawtedwu/aicv@latest <command>`
+- Do not fabricate resume content — only use what the user explicitly provides.
+- `meta.updatedAt` is server-managed; do not set it manually.

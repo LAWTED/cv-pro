@@ -73,11 +73,12 @@ export default function RegisterFlow() {
 
   if (step === "success" && result) {
     const cliPrompt =
-      `请你用 @lawtedwu/aicv CLI 帮我更新简历，token 是 ${result.token}。\n` +
-      `步骤：\n` +
-      `1. npx @lawtedwu/aicv help\n` +
-      `2. 读取我附上的 PDF，提取简历数据\n` +
-      `3. CV_TOKEN=${result.token} npx @lawtedwu/aicv update`;
+      `Update my living resume on cv.ha7ch.com using the aicv CLI.\n\n` +
+      `CLI: npx @lawtedwu/aicv@latest (run --help first)\n` +
+      `Token env: CV_TOKEN=${result.token}\n\n` +
+      `I may attach a PDF, paste text, or describe changes in plain language — ` +
+      `figure out the input format and update the relevant sections. ` +
+      `Ask me if anything is unclear.`;
 
     const mcpCmd =
       `claude mcp add cv --transport http https://cv.ha7ch.com/api/mcp \\\n` +
