@@ -10,17 +10,17 @@ Claim a handle at cv.ha7ch.com, get a token, then paste one prompt into Claude C
 2. Paste the generated prompt into Claude Code (CLI tab) or configure MCP directly
 3. Drop a PDF, paste text, or describe changes — Claude figures out the rest
 
-## CLI (`npx @lawtedwu/aicv@latest`)
+## CLI (`npx ai-cv@latest`)
 
 ```bash
-npx @lawtedwu/aicv@latest --help
-CV_TOKEN=cv_pat_... npx @lawtedwu/aicv@latest get
-CV_TOKEN=cv_pat_... npx @lawtedwu/aicv@latest update resume.json
-CV_TOKEN=cv_pat_... npx @lawtedwu/aicv@latest update-section experience data.json
-CV_TOKEN=cv_pat_... npx @lawtedwu/aicv@latest open
+npx ai-cv@latest --help
+CV_TOKEN=cv_pat_... npx ai-cv@latest get
+CV_TOKEN=cv_pat_... npx ai-cv@latest update resume.json
+CV_TOKEN=cv_pat_... npx ai-cv@latest update-section experience data.json
+CV_TOKEN=cv_pat_... npx ai-cv@latest open
 ```
 
-npm: [`@lawtedwu/aicv`](https://www.npmjs.com/package/@lawtedwu/aicv)
+npm: [`ai-cv`](https://www.npmjs.com/package/ai-cv)
 
 ## MCP (direct)
 
@@ -35,7 +35,7 @@ Tools: `get_resume` · `update_resume` · `update_section`
 
 ```
 cv/
-├── cli/                    npm package @lawtedwu/aicv
+├── cli/                    npm package ai-cv
 ├── plugin/                 Claude Code plugin (marketplace)
 ├── src/
 │   ├── app/

@@ -6,10 +6,10 @@ import { whoami, getResume, putResume, patchSection } from "./api.js";
 const VERSION = "0.1.0";
 
 const HELP = `
-aicv — living resume CLI  (cv.ha7ch.com)
+aicv — AI-native resume CLI  (cv.ha7ch.com)
 
 USAGE
-  cv <command> [options]
+  aicv <command> [options]
 
 COMMANDS
   login <token>               Save your personal access token
@@ -25,11 +25,11 @@ SECTIONS
   projectsRecent, projectsDetailed, skills, contact
 
 EXAMPLES
-  cv login cv_pat_xxxxxxxxxx
-  cv whoami
-  cv get
-  cv update resume.json
-  cv update-section experience experience.json
+  aicv login cv_pat_xxxxxxxxxx
+  aicv whoami
+  aicv get
+  aicv update resume.json
+  aicv update-section experience experience.json
   echo '{"name":"Lawted"}' | cv update-section header
 
 ENV
@@ -82,7 +82,7 @@ async function main() {
   // commands that need auth
   const config = loadConfig();
   if (!config?.token) {
-    die("Not logged in. Run: cv login <token>\nGet a token at cv.ha7ch.com");
+    die("Not logged in. Run: aicv login <token>\nGet a token at cv.ha7ch.com");
   }
 
   if (cmd === "whoami") {
@@ -126,7 +126,7 @@ async function main() {
     return;
   }
 
-  die(`Unknown command: ${cmd}\nRun 'cv help' to see available commands.`);
+  die(`Unknown command: ${cmd}\nRun 'aicv help' to see available commands.`);
 }
 
 function readJsonArg(filePath: string | undefined, label: string): unknown {

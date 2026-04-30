@@ -3,16 +3,16 @@ import RegisterFlow from "@/components/RegisterFlow";
 export default function Home() {
   return (
     <main className="mx-auto max-w-xl px-6 py-16 md:py-24">
-      <h1 className="font-serif text-5xl tracking-tight text-zinc-900">cv</h1>
-      <p className="mt-2 text-zinc-500">Your PDF resume, as a living site.</p>
+      <h1 className="font-serif text-5xl tracking-tight">cv</h1>
+      <p className="mt-2 text-muted-foreground">AI-native resume.</p>
 
       <div className="mt-10">
         <RegisterFlow />
       </div>
 
-      <footer className="mt-14 text-xs text-zinc-400">
-        <a href="https://github.com/LAWTED/cv" target="_blank" rel="noopener noreferrer" className="hover:text-zinc-600">
-          github.com/LAWTED/cv
+      <footer className="mt-14 text-xs text-muted-foreground">
+        <a href="https://github.com/LAWTED/aicv" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
+          github.com/LAWTED/aicv
         </a>
       </footer>
     </main>
