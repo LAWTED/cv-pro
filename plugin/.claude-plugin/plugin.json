@@ -1,0 +1,8 @@
+{
+  "name": "cv",
+  "version": "0.1.0",
+  "description": "Turn your PDF resume into a living personal site at cv.ha7ch.com/{username}.",
+  "author": "ha7ch",
+  "homepage": "https://cv.ha7ch.com",
+  "repository": "https://github.com/LAWTED/cv"
+}

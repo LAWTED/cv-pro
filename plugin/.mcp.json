@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "cv": {
+      "type": "http",
+      "url": "https://cv.ha7ch.com/api/mcp",
+      "headers": {
+        "Authorization": "Bearer ${CV_TOKEN}"
+      }
+    }
+  }
+}
