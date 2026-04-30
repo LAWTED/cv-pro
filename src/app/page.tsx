@@ -1,4 +1,5 @@
 import RegisterFlow from "@/components/RegisterFlow";
+import { Github } from "lucide-react";
 
 export default function Home() {
   return (
@@ -10,9 +11,9 @@ export default function Home() {
         <RegisterFlow />
       </div>
 
-      <footer className="mt-14 text-xs text-muted-foreground">
-        <a href="https://github.com/LAWTED/ai-cv" target="_blank" rel="noopener noreferrer" className="hover:text-foreground">
-          github.com/LAWTED/ai-cv
+      <footer className="mt-14">
+        <a href="https://github.com/LAWTED/ai-cv" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
+          <Github className="h-4 w-4" />
         </a>
       </footer>
     </main>
