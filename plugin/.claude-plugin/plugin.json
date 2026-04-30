@@ -1,8 +1,8 @@
 {
   "name": "cv",
   "version": "0.1.0",
-  "description": "Turn your PDF resume into a living personal site at cv.ha7ch.com/{username}.",
-  "author": { "name": "ha7ch", "url": "https://cv.ha7ch.com" },
-  "homepage": "https://cv.ha7ch.com",
+  "description": "Turn your PDF resume into a living personal site at ai-cv.ha7ch.com/{username}.",
+  "author": { "name": "ha7ch", "url": "https://ai-cv.ha7ch.com" },
+  "homepage": "https://ai-cv.ha7ch.com",
   "repository": "https://github.com/LAWTED/cv"
 }

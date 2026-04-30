@@ -1,12 +1,12 @@
 # cv
 
-Your PDF resume, as a living site — [cv.ha7ch.com](https://cv.ha7ch.com)
+Your PDF resume, as a living site — [ai-cv.ha7ch.com](https://ai-cv.ha7ch.com)
 
-Claim a handle at cv.ha7ch.com, get a token, then paste one prompt into Claude Code. It installs the CLI, reads your PDF, and publishes your resume to `cv.ha7ch.com/{handle}`.
+Claim a handle at ai-cv.ha7ch.com, get a token, then paste one prompt into Claude Code. It installs the CLI, reads your PDF, and publishes your resume to `ai-cv.ha7ch.com/{handle}`.
 
 ## How it works
 
-1. Register at [cv.ha7ch.com](https://cv.ha7ch.com) → get a token
+1. Register at [ai-cv.ha7ch.com](https://ai-cv.ha7ch.com) → get a token
 2. Paste the generated prompt into Claude Code (CLI tab) or configure MCP directly
 3. Drop a PDF, paste text, or describe changes — Claude figures out the rest
 
@@ -25,7 +25,7 @@ npm: [`ai-cv`](https://www.npmjs.com/package/ai-cv)
 ## MCP (direct)
 
 ```bash
-claude mcp add cv --transport http https://cv.ha7ch.com/api/mcp \
+claude mcp add cv --transport http https://ai-cv.ha7ch.com/api/mcp \
   --header "Authorization: Bearer cv_pat_..."
 ```
 

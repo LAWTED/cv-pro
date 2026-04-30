@@ -17,7 +17,7 @@ export async function generateMetadata({
   }
   return {
     title: `${resume.header.name} — cv`,
-    description: `${resume.header.name}'s living resume on cv.ha7ch.com`,
+    description: `${resume.header.name}'s living resume on ai-cv.ha7ch.com`,
   };
 }
 

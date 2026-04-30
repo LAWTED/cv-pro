@@ -1,6 +1,6 @@
 # cv plugin
 
-Turn your PDF resume into a living personal site at `cv.ha7ch.com/{username}`.
+Turn your PDF resume into a living personal site at `ai-cv.ha7ch.com/{username}`.
 
 ## Install
 
@@ -10,7 +10,7 @@ Turn your PDF resume into a living personal site at `cv.ha7ch.com/{username}`.
 
 ## Configure your token
 
-1. Sign in at <https://cv.ha7ch.com/admin/login>
+1. Sign in at <https://ai-cv.ha7ch.com/admin/login>
 2. Visit **Tokens** → **Generate token** and copy the `cv_pat_...` value
 3. Export it where Claude Code can read it:
 
@@ -26,7 +26,7 @@ In any Claude Code session, drop your resume PDF into the chat and say:
 
 > Update my resume with this PDF.
 
-Claude will read the PDF, extract the structured shape, and push it via the `cv` MCP server. Within a second, your live page at `cv.ha7ch.com/{your-handle}` reflects the change.
+Claude will read the PDF, extract the structured shape, and push it via the `cv` MCP server. Within a second, your live page at `ai-cv.ha7ch.com/{your-handle}` reflects the change.
 
 You can also conversationally edit:
 

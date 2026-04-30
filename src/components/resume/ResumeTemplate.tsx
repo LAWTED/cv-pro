@@ -139,7 +139,7 @@ export default function ResumeTemplate({ data }: { data: ResumeData }) {
       )}
 
       <footer className="mt-12 border-t border-zinc-200 pt-4 text-xs text-zinc-400">
-        cv.ha7ch.com/{data.username} · updated {new Date(data.meta.updatedAt).toLocaleDateString()}
+        ai-cv.ha7ch.com/{data.username} · updated {new Date(data.meta.updatedAt).toLocaleDateString()}
       </footer>
     </main>
   );

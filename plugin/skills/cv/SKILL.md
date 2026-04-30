@@ -1,11 +1,11 @@
 ---
 name: cv
-description: Update, view, or edit the user's living resume at cv.ha7ch.com. Triggers on any resume-related request — attaching a PDF, pasting resume text, asking to edit an experience or section, or asking to view the current resume.
+description: Update, view, or edit the user's living resume at ai-cv.ha7ch.com. Triggers on any resume-related request — attaching a PDF, pasting resume text, asking to edit an experience or section, or asking to view the current resume.
 allowed-tools: Bash(npx ai-cv@latest:*)
 argument-hint: "[section to update, or attach a PDF / paste resume text]"
 ---
 
-You are helping the user keep their living resume at cv.ha7ch.com up to date using the `aicv` CLI.
+You are helping the user keep their living resume at ai-cv.ha7ch.com up to date using the `aicv` CLI.
 
 ## Preflight
 
@@ -15,7 +15,7 @@ Check that the CLI is available and the token is set:
 CV_TOKEN=$CV_TOKEN npx ai-cv@latest --help
 ```
 
-If `CV_TOKEN` is not set, ask the user for their token (they can get one at cv.ha7ch.com) and prepend it to subsequent CLI calls.
+If `CV_TOKEN` is not set, ask the user for their token (they can get one at ai-cv.ha7ch.com) and prepend it to subsequent CLI calls.
 
 Fetch the current resume so you have context:
 
@@ -42,7 +42,7 @@ After updating, confirm success and show the live URL:
 CV_TOKEN=$CV_TOKEN npx ai-cv@latest whoami
 ```
 
-Tell the user their page URL: `https://cv.ha7ch.com/{handle}`
+Tell the user their page URL: `https://ai-cv.ha7ch.com/{handle}`
 
 ## Notes
 

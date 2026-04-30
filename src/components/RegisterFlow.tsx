@@ -54,12 +54,12 @@ export default function RegisterFlow() {
 
   if (result) {
     const cliPrompt =
-      `Update my resume at cv.ha7ch.com using the aicv CLI.\n` +
+      `Update my resume at ai-cv.ha7ch.com using the aicv CLI.\n` +
       `CLI: npx ai-cv@latest\n` +
       `CV_TOKEN=${result.token}`;
 
     const mcpCmd =
-      `claude mcp add cv --transport http https://cv.ha7ch.com/api/mcp \\\n` +
+      `claude mcp add cv --transport http https://ai-cv.ha7ch.com/api/mcp \\\n` +
       `  --header "Authorization: Bearer ${result.token}"`;
 
     return (
@@ -67,7 +67,7 @@ export default function RegisterFlow() {
         {/* Claimed handle */}
         <div className="flex items-center justify-between text-sm">
           <span className="text-muted-foreground">
-            <span className="font-medium text-foreground">cv.ha7ch.com/{result.handle}</span>{" "}
+            <span className="font-medium text-foreground">ai-cv.ha7ch.com/{result.handle}</span>{" "}
             is yours
           </span>
           <button
@@ -112,7 +112,7 @@ export default function RegisterFlow() {
           target="_blank"
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          cv.ha7ch.com/{result.handle}
+          ai-cv.ha7ch.com/{result.handle}
           <ExternalLink className="h-3.5 w-3.5" />
         </Link>
       </div>
@@ -123,7 +123,7 @@ export default function RegisterFlow() {
     <form onSubmit={submit} className="space-y-3">
       <p className="text-sm text-muted-foreground">
         Your resume will live at{" "}
-        <span className="font-mono text-foreground">cv.ha7ch.com/{handle || "handle"}</span>
+        <span className="font-mono text-foreground">ai-cv.ha7ch.com/{handle || "handle"}</span>
       </p>
       <div className="flex gap-2">
         <Input

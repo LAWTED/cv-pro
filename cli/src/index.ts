@@ -6,7 +6,7 @@ import { whoami, getResume, putResume, patchSection } from "./api.js";
 const VERSION = "0.1.0";
 
 const HELP = `
-aicv — AI-native resume CLI  (cv.ha7ch.com)
+aicv — AI-native resume CLI  (ai-cv.ha7ch.com)
 
 USAGE
   aicv <command> [options]
@@ -35,7 +35,7 @@ EXAMPLES
 ENV
   CV_TOKEN   token (overrides saved config)
   CV_HANDLE  handle (required when using CV_TOKEN)
-  CV_API     API base URL (default: https://cv.ha7ch.com)
+  CV_API     API base URL (default: https://ai-cv.ha7ch.com)
 `.trim();
 
 async function main() {
@@ -56,7 +56,7 @@ async function main() {
   if (cmd === "login") {
     const token = args[1];
     if (!token) {
-      die("Usage: cv login <token>\nGet a token at cv.ha7ch.com");
+      die("Usage: cv login <token>\nGet a token at ai-cv.ha7ch.com");
     }
     if (!token.startsWith("cv_pat_")) {
       die("Token must start with cv_pat_");
@@ -82,7 +82,7 @@ async function main() {
   // commands that need auth
   const config = loadConfig();
   if (!config?.token) {
-    die("Not logged in. Run: aicv login <token>\nGet a token at cv.ha7ch.com");
+    die("Not logged in. Run: aicv login <token>\nGet a token at ai-cv.ha7ch.com");
   }
 
   if (cmd === "whoami") {
