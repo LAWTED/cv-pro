@@ -1,0 +1,82 @@
+# ai-cv
+
+> AI-native living resume — ai-cv.ha7ch.com
+
+Turn a PDF resume into a personal site at `ai-cv.ha7ch.com/{handle}`. Any AI agent can create, read, and update it via CLI or MCP — no browser required for setup.
+
+## What it is
+
+- **Public resume page** at `ai-cv.ha7ch.com/{handle}`
+- **CLI** (`npx ai-cv@latest`) for terminal or AI agent use
+- **MCP server** at `https://ai-cv.ha7ch.com/api/mcp` for direct tool integration
+
+## How to set up a new account (for AI agents)
+
+1. Ask the user: "What handle do you want? (ai-cv.ha7ch.com/{handle})"
+2. Run: `npx ai-cv@latest register {handle}` — claims the handle and saves the token automatically
+3. Optionally publish a resume: `npx ai-cv@latest update resume.json`
+4. Confirm: `npx ai-cv@latest whoami`
+
+No browser needed. No token copying. One command from zero to live page.
+
+## CLI commands
+
+```
+npx ai-cv@latest register <handle>          # claim handle + auto-login
+npx ai-cv@latest login <cv_pat_...>         # save existing token
+npx ai-cv@latest whoami                     # show handle + live URL
+npx ai-cv@latest get                        # fetch resume JSON
+npx ai-cv@latest update <file.json>         # replace full resume
+npx ai-cv@latest update-section <section> <file.json>
+npx ai-cv@latest open                       # open live page in browser
+```
+
+## MCP setup
+
+Replace `cv_pat_...` with your token from ai-cv.ha7ch.com.
+
+**Claude Code (CLI)**
+```bash
+claude mcp add cv --transport http https://ai-cv.ha7ch.com/api/mcp \
+  --header "Authorization: Bearer cv_pat_..."
+```
+
+**Cursor** — add to `~/.cursor/mcp.json`:
+```json
+{
+  "mcpServers": {
+    "cv": {
+      "type": "http",
+      "url": "https://ai-cv.ha7ch.com/api/mcp",
+      "headers": { "Authorization": "Bearer cv_pat_..." }
+    }
+  }
+}
+```
+
+**Codex** — add to `~/.codex/config.json`:
+```json
+{
+  "mcpServers": {
+    "cv": {
+      "type": "http",
+      "url": "https://ai-cv.ha7ch.com/api/mcp",
+      "headers": { "Authorization": "Bearer cv_pat_..." }
+    }
+  }
+}
+```
+
+MCP tools: `get_resume`, `update_resume`, `update_section`
+
+## Resume sections
+
+`header` · `personalInfo` · `experience` · `education` · `projectsRecent` · `projectsDetailed` · `skills` · `contact`
+
+## npm package
+
+`ai-cv` on npm — https://www.npmjs.com/package/ai-cv
+
+## Source
+
+https://github.com/LAWTED/ai-cv

@@ -17,9 +17,28 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: "cv — turn your PDF resume into a living personal site",
+  title: "ai-cv — AI-native living resume",
   description:
-    "Install the cv plugin in Claude Code or Codex, drop in your PDF, and your resume page updates instantly.",
+    "Claim a handle, run one command, and your resume is live at ai-cv.ha7ch.com/{handle}. Drop a PDF or describe changes — any AI agent updates it instantly via CLI or MCP.",
+  metadataBase: new URL("https://ai-cv.ha7ch.com"),
+  openGraph: {
+    title: "ai-cv — AI-native living resume",
+    description:
+      "Claim a handle, run one command, and your resume is live at ai-cv.ha7ch.com/{handle}. Drop a PDF or describe changes — any AI agent updates it instantly via CLI or MCP.",
+    url: "https://ai-cv.ha7ch.com",
+    siteName: "ai-cv",
+    type: "website",
+  },
+  twitter: {
+    card: "summary",
+    title: "ai-cv — AI-native living resume",
+    description:
+      "Claim a handle, run one command, and your resume is live at ai-cv.ha7ch.com/{handle}.",
+  },
+  keywords: [
+    "ai-cv", "AI resume", "living resume", "Claude Code resume",
+    "resume CLI", "resume MCP", "AI-native resume", "npx ai-cv",
+  ],
 };
 
 export default function RootLayout({
