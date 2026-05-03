@@ -1,6 +1,7 @@
 import "server-only";
 import { z } from "zod";
 import { getResumeByUsername, upsertResume } from "@/lib/resume-store";
+import { RESUME_SCHEMA_TEXT } from "@/lib/schema-doc";
 import {
   type ResumeData,
   type SectionName,
@@ -10,6 +11,12 @@ import {
 } from "@/types/resume";
 
 export const TOOLS = [
+  {
+    name: "get_schema",
+    description:
+      "Show the resume schema — section names and field shapes. Call this before update_resume / update_section if you're unsure about field names; unknown keys are rejected by the validator.",
+    inputSchema: { type: "object", properties: {}, additionalProperties: false },
+  },
   {
     name: "get_resume",
     description: "Fetch the authenticated user's current resume as structured JSON.",
@@ -21,7 +28,7 @@ export const TOOLS = [
       "Replace the authenticated user's entire resume. Use after parsing a PDF, or for large rewrites. " +
       "The 'username' and 'meta' fields are auto-managed — do not send them. " +
       "Required top-level sections: header, personalInfo, experience, education, " +
-      "projectsRecent, projectsDetailed, skills, contact. Unknown keys are rejected.",
+      "projectsRecent, projectsDetailed, skills, contact. Unknown keys are rejected — call get_schema first if unsure.",
     inputSchema: {
       type: "object",
       properties: {
@@ -35,7 +42,7 @@ export const TOOLS = [
     name: "update_section",
     description:
       "Replace a single top-level section of the resume. Use for targeted conversational edits. " +
-      "Each section has a strict shape — see the README or call get_resume to inspect the live structure.",
+      "Each section has a strict shape — call get_schema to see field names, or get_resume to inspect the live structure.",
     inputSchema: {
       type: "object",
       properties: {
@@ -59,6 +66,10 @@ export async function dispatchTool(
 ): Promise<{ content: Array<{ type: "text"; text: string }>; isError?: boolean }> {
   try {
     switch (name as ToolName) {
+      case "get_schema": {
+        return text(RESUME_SCHEMA_TEXT);
+      }
+
       case "get_resume": {
         const resume = await getResumeByUsername(ctx.username);
         if (!resume) return text(`No resume yet for @${ctx.username}. Use update_resume to publish one.`);

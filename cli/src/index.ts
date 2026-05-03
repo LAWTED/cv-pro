@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 import { readFileSync } from "node:fs";
 import { loadConfig, saveConfig, clearConfig, DEFAULT_API } from "./config.js";
-import { register, whoami, getResume, putResume, patchSection } from "./api.js";
+import { register, whoami, getResume, putResume, patchSection, getSchema } from "./api.js";
 
-const VERSION = "0.2.6";
+const VERSION = "0.2.7";
 
 const HELP = `
 aicv — AI-native resume CLI  (ai-cv.ha7ch.com)
@@ -16,6 +16,7 @@ COMMANDS
   login <token>               Save an existing personal access token
   logout                      Remove saved credentials
   whoami                      Show authenticated handle
+  schema                      Show resume schema (section names + field shapes)
   get                         Print current resume as JSON
   update [file]               Replace entire resume from a JSON file (or stdin)
   update-section <section>    Update one section from JSON file (or stdin)
@@ -24,6 +25,8 @@ COMMANDS
 SECTIONS
   header, personalInfo, experience, education,
   projectsRecent, projectsDetailed, skills, contact
+
+  Run 'ai-cv schema' for the full field-level structure.
 
 EXAMPLES
   ai-cv register lawted
@@ -98,6 +101,15 @@ async function main() {
   if (cmd === "logout") {
     clearConfig();
     console.log("Logged out.");
+    return;
+  }
+
+  // schema — public, no auth needed
+  if (cmd === "schema") {
+    const apiBase = loadConfig()?.apiBase ?? process.env.CV_API ?? DEFAULT_API;
+    const wantJson = args.slice(1).includes("--json");
+    const result = await getSchema(apiBase);
+    console.log(wantJson ? JSON.stringify(result.json, null, 2) : result.text);
     return;
   }
 

@@ -3,6 +3,28 @@ interface AuthConfig {
   apiBase: string;
 }
 
+interface ServerError {
+  error?: string;
+  issues?: Array<{ path: string; message: string }>;
+  allowed?: string[];
+}
+
+async function throwServerError(res: Response): Promise<never> {
+  const body = (await res.json().catch(() => ({}))) as ServerError;
+  let msg = body.error ?? res.statusText;
+  if (body.issues?.length) {
+    msg +=
+      "\n" +
+      body.issues
+        .map((i) => `  - ${i.path || "(root)"}: ${i.message}`)
+        .join("\n");
+  }
+  if (body.allowed?.length) {
+    msg += `\n  Allowed: ${body.allowed.join(", ")}`;
+  }
+  throw new Error(msg);
+}
+
 // Some hosted AI agents (Claude Code Cloud, ChatGPT Code Interpreter)
 // run inside sandboxes whose egress proxy denies arbitrary hosts and
 // returns 403 with `x-deny-reason: host_not_allowed` BEFORE the request
@@ -72,10 +94,7 @@ export async function whoami(cfg: AuthConfig): Promise<WhoamiResult> {
 
 export async function getResume(cfg: AuthConfig) {
   const res = await req(cfg, "/api/v1/resume");
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error((err as { error: string }).error);
-  }
+  if (!res.ok) await throwServerError(res);
   return res.json();
 }
 
@@ -84,10 +103,7 @@ export async function putResume(cfg: AuthConfig, data: unknown) {
     method: "PUT",
     body: JSON.stringify(data),
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error((err as { error: string }).error);
-  }
+  if (!res.ok) await throwServerError(res);
   return res.json();
 }
 
@@ -100,9 +116,13 @@ export async function patchSection(
     method: "PATCH",
     body: JSON.stringify({ section, value }),
   });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: res.statusText }));
-    throw new Error((err as { error: string }).error);
-  }
+  if (!res.ok) await throwServerError(res);
+  return res.json();
+}
+
+export async function getSchema(apiBase: string): Promise<{ json: unknown; text: string }> {
+  const res = await fetch(`${apiBase}/api/v1/schema`);
+  checkEgressBlock({ token: "", apiBase }, res);
+  if (!res.ok) await throwServerError(res);
   return res.json();
 }
