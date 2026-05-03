@@ -3,6 +3,7 @@ export interface WorkExperience {
   role: string;
   startDate: string;
   endDate: string;
+  bullets: string[];
 }
 
 export interface Education {
