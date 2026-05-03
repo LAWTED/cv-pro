@@ -1,8 +1,22 @@
 import "server-only";
+import { z } from "zod";
 import { getResumeByUsername, upsertResume } from "@/lib/resume-store";
-import type { ResumeData } from "@/types/resume";
+import { RESUME_SCHEMA_TEXT } from "@/lib/schema-doc";
+import {
+  type ResumeData,
+  type SectionName,
+  resumeSchema,
+  SECTION_NAMES,
+  SECTION_SCHEMAS,
+} from "@/types/resume";
 
 export const TOOLS = [
+  {
+    name: "get_schema",
+    description:
+      "Show the resume schema — section names and field shapes. Call this before update_resume / update_section if you're unsure about field names; unknown keys are rejected by the validator.",
+    inputSchema: { type: "object", properties: {}, additionalProperties: false },
+  },
   {
     name: "get_resume",
     description: "Fetch the authenticated user's current resume as structured JSON.",
@@ -11,11 +25,14 @@ export const TOOLS = [
   {
     name: "update_resume",
     description:
-      "Replace the authenticated user's entire resume. Use after parsing a PDF, or for large rewrites. The 'username' and 'meta' fields are auto-managed.",
+      "Replace the authenticated user's entire resume. Use after parsing a PDF, or for large rewrites. " +
+      "The 'username' and 'meta' fields are auto-managed — do not send them. " +
+      "Required top-level sections: header, personalInfo, experience, education, " +
+      "projectsRecent, projectsDetailed, skills, contact. Unknown keys are rejected — call get_schema first if unsure.",
     inputSchema: {
       type: "object",
       properties: {
-        data: { type: "object", description: "Full ResumeData object." },
+        data: { type: "object", description: "Full ResumeData object (without username/meta)." },
       },
       required: ["data"],
       additionalProperties: false,
@@ -24,17 +41,12 @@ export const TOOLS = [
   {
     name: "update_section",
     description:
-      "Replace a single top-level section of the resume. Use for targeted conversational edits.",
+      "Replace a single top-level section of the resume. Use for targeted conversational edits. " +
+      "Each section has a strict shape — call get_schema to see field names, or get_resume to inspect the live structure.",
     inputSchema: {
       type: "object",
       properties: {
-        section: {
-          type: "string",
-          enum: [
-            "header", "personalInfo", "experience", "education",
-            "projectsRecent", "projectsDetailed", "skills", "contact",
-          ],
-        },
+        section: { type: "string", enum: SECTION_NAMES },
         value: { description: "The new value for that section." },
       },
       required: ["section", "value"],
@@ -54,6 +66,10 @@ export async function dispatchTool(
 ): Promise<{ content: Array<{ type: "text"; text: string }>; isError?: boolean }> {
   try {
     switch (name as ToolName) {
+      case "get_schema": {
+        return text(RESUME_SCHEMA_TEXT);
+      }
+
       case "get_resume": {
         const resume = await getResumeByUsername(ctx.username);
         if (!resume) return text(`No resume yet for @${ctx.username}. Use update_resume to publish one.`);
@@ -61,16 +77,42 @@ export async function dispatchTool(
       }
 
       case "update_resume": {
-        const data = args.data as ResumeData;
-        if (!data || typeof data !== "object") return error("Missing 'data' object.");
-        await upsertResume({ ...data, username: ctx.username });
-        return text(`Resume saved. View at /${ctx.username}.`);
+        if (!args.data || typeof args.data !== "object") {
+          return error("Missing 'data' object.");
+        }
+        const merged = {
+          ...(args.data as Record<string, unknown>),
+          username: ctx.username,
+          meta: { updatedAt: new Date().toISOString() },
+        };
+        const result = resumeSchema.safeParse(merged);
+        if (!result.success) {
+          return error(`Invalid resume:\n${formatIssues(result.error)}`);
+        }
+        const saved = await upsertResume(result.data);
+        return text(`Resume saved. View at /${ctx.username}.\n\nStored data:\n${JSON.stringify(saved, null, 2)}`);
       }
 
       case "update_section": {
         const section = String(args.section);
-        const current = (await getResumeByUsername(ctx.username)) ?? emptyResume(ctx.username);
-        const next = { ...current, [section]: args.value, username: ctx.username } as ResumeData;
+        if (!isSectionName(section)) {
+          return error(
+            `Unknown section '${section}'. Allowed: ${SECTION_NAMES.join(", ")}.`,
+          );
+        }
+        const sectionResult = SECTION_SCHEMAS[section].safeParse(args.value);
+        if (!sectionResult.success) {
+          return error(
+            `Invalid value for section '${section}':\n${formatIssues(sectionResult.error)}`,
+          );
+        }
+        const current =
+          (await getResumeByUsername(ctx.username)) ?? emptyResume(ctx.username);
+        const next: ResumeData = {
+          ...current,
+          [section]: sectionResult.data,
+          username: ctx.username,
+        };
         await upsertResume(next);
         return text(`Section '${section}' updated.`);
       }
@@ -81,6 +123,21 @@ export async function dispatchTool(
   } catch (err) {
     return error(err instanceof Error ? err.message : String(err));
   }
+}
+
+function isSectionName(s: string): s is SectionName {
+  return (SECTION_NAMES as readonly string[]).includes(s);
+}
+
+function formatIssues(err: z.ZodError): string {
+  return err.issues
+    .map((issue) => {
+      const path = issue.path.length
+        ? issue.path.map((p) => String(p)).join(".")
+        : "(root)";
+      return `- ${path}: ${issue.message}`;
+    })
+    .join("\n");
 }
 
 function text(s: string) {
