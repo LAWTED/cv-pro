@@ -67,6 +67,10 @@ export default function RegisterFlow() {
   const [error, setError] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
   const [mcpClient, setMcpClient] = useState<McpClient>("claude");
+  const [takenHandle, setTakenHandle] = useState<string | null>(null);
+  const [token, setToken] = useState("");
+  const [tokenLoading, setTokenLoading] = useState(false);
+  const [tokenError, setTokenError] = useState("");
 
   useEffect(() => {
     try {
@@ -84,6 +88,8 @@ export default function RegisterFlow() {
     if (!h) return;
     setLoading(true);
     setError("");
+    setTakenHandle(null);
+    setTokenError("");
     const res = await fetch("/api/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -91,8 +97,44 @@ export default function RegisterFlow() {
     });
     const data = await res.json();
     setLoading(false);
-    if (!res.ok) { setError(data.error ?? "Error"); return; }
+    if (!res.ok) {
+      setError(data.error ?? "Error");
+      if (res.status === 409) setTakenHandle(h);
+      return;
+    }
     const saved = { handle: data.handle, token: data.token };
+    try { localStorage.setItem(LS_KEY, JSON.stringify(saved)); } catch {}
+    setResult(saved);
+  }
+
+  async function loginWithToken(e?: React.SyntheticEvent) {
+    e?.preventDefault();
+    const t = token.trim();
+    if (!t || !takenHandle) return;
+    setTokenLoading(true);
+    setTokenError("");
+    const res = await fetch("/api/v1/resume", {
+      headers: { Authorization: `Bearer ${t}` },
+    });
+    setTokenLoading(false);
+    if (res.status === 401 || res.status === 403) {
+      setTokenError("Invalid token.");
+      return;
+    }
+    if (!res.ok) {
+      setTokenError("Server error. Try again.");
+      return;
+    }
+    const data = (await res.json()) as { username?: string };
+    if (!data.username) {
+      setTokenError("Invalid token.");
+      return;
+    }
+    if (data.username !== takenHandle) {
+      setTokenError(`This token belongs to @${data.username}, not @${takenHandle}.`);
+      return;
+    }
+    const saved = { handle: takenHandle, token: t };
     try { localStorage.setItem(LS_KEY, JSON.stringify(saved)); } catch {}
     setResult(saved);
   }
@@ -222,7 +264,12 @@ export default function RegisterFlow() {
       <div className="flex gap-2">
         <Input
           value={handle}
-          onChange={(e) => { setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "")); setError(""); }}
+          onChange={(e) => {
+            setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""));
+            setError("");
+            setTakenHandle(null);
+            setTokenError("");
+          }}
           placeholder="your-handle"
           maxLength={30}
           required
@@ -234,6 +281,35 @@ export default function RegisterFlow() {
         </Button>
       </div>
       {error && <p className="text-sm text-destructive">{error}</p>}
+      {takenHandle && (
+        <div className="space-y-2 pt-2">
+          <p className="text-sm text-muted-foreground">
+            If it&apos;s yours, paste your token to log back in.
+          </p>
+          <div className="flex gap-2">
+            <Input
+              value={token}
+              onChange={(e) => { setToken(e.target.value); setTokenError(""); }}
+              placeholder="cv_pat_..."
+              className="font-mono"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  loginWithToken();
+                }
+              }}
+            />
+            <Button
+              type="button"
+              onClick={() => loginWithToken()}
+              disabled={tokenLoading || !token.trim()}
+            >
+              {tokenLoading ? "…" : "Log in →"}
+            </Button>
+          </div>
+          {tokenError && <p className="text-sm text-destructive">{tokenError}</p>}
+        </div>
+      )}
     </form>
   );
 }
