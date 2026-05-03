@@ -45,6 +45,8 @@ Tell the user their live URL: **https://ai-cv.ha7ch.com/{handle}**
 
 For future edits: drop a PDF or describe changes. Sections: `header`, `personalInfo`, `experience`, `education`, `projectsRecent`, `projectsDetailed`, `skills`, `contact`.
 
+Each `experience` and `projectsDetailed` entry takes a `bullets: string[]` field — these render as the role's bullet points on the page. Skipping them leaves the entry as just a header line.
+
 ---
 
 ## CLI reference
@@ -57,7 +59,12 @@ npx ai-cv@latest get                    # print resume JSON
 npx ai-cv@latest update resume.json     # replace full resume
 npx ai-cv@latest update-section <section> data.json
 npx ai-cv@latest open                   # open live page in browser
+npx ai-cv@latest open --json            # open the public JSON view
 ```
+
+## Public JSON URL
+
+Every resume is also served as raw JSON at **`https://ai-cv.ha7ch.com/{handle}.json`** — no auth, CORS-open, fetch-friendly for any AI agent.
 
 `CV_TOKEN` env var overrides saved credentials.
 

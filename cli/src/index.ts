@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { loadConfig, saveConfig, clearConfig, DEFAULT_API } from "./config.js";
 import { register, whoami, getResume, putResume, patchSection } from "./api.js";
 
-const VERSION = "0.2.5";
+const VERSION = "0.2.6";
 
 const HELP = `
 aicv — AI-native resume CLI  (ai-cv.ha7ch.com)
@@ -19,7 +19,7 @@ COMMANDS
   get                         Print current resume as JSON
   update [file]               Replace entire resume from a JSON file (or stdin)
   update-section <section>    Update one section from JSON file (or stdin)
-  open                        Open your live resume page in the browser
+  open [--json]               Open your live resume page (or its raw JSON) in the browser
 
 SECTIONS
   header, personalInfo, experience, education,
@@ -64,6 +64,7 @@ async function main() {
     saveConfig({ token: result.token, handle: result.handle, apiBase });
     console.log(`Logged in as @${result.handle}`);
     console.log(`Page: ${apiBase}/${result.handle}`);
+    console.log(`JSON: ${apiBase}/${result.handle}.json   (public, AI-readable)`);
     return;
   }
 
@@ -121,6 +122,7 @@ async function main() {
     }
     console.log(`@${handle}`);
     console.log(`Page: ${config.apiBase}/${handle}`);
+    console.log(`JSON: ${config.apiBase}/${handle}.json   (public, AI-readable)`);
     return;
   }
 
@@ -149,8 +151,11 @@ async function main() {
   }
 
   if (cmd === "open") {
+    const wantJson = args.slice(1).includes("--json");
     const { execSync } = await import("node:child_process");
-    const url = `${config.apiBase}/${config.handle}`;
+    const url = wantJson
+      ? `${config.apiBase}/${config.handle}.json`
+      : `${config.apiBase}/${config.handle}`;
     const opener =
       process.platform === "darwin" ? "open" :
       process.platform === "win32" ? "start" : "xdg-open";
