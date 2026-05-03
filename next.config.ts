@@ -1,7 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  async rewrites() {
+    return [
+      {
+        source: "/:username([a-z0-9][a-z0-9-]{0,29}).json",
+        destination: "/api/public/:username",
+      },
+    ];
+  },
 };
 
 export default nextConfig;
