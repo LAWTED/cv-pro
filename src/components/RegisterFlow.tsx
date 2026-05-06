@@ -72,10 +72,13 @@ function buildCliPrompt(token: string): string {
     `Then update based on whatever I provide — PDF, pasted text, or described changes. ` +
     `Run npx cv-pro@latest --help if needed. Ask if unclear.\n\n` +
     `After saving, run this workflow:\n` +
-    `1. ASK me: "Which audience is this resume for? Specific company (e.g. OpenAI), role (e.g. designer, ML, research), or both?"\n` +
-    `2. Add matching tags to each relevant experience / project entry. Use update_section experience with the tags filled in.\n` +
-    `3. Tell me the final shareable URL, e.g. "Your designer-track resume is at cv.ha7ch.com/<me>?role=designer — send that when applying."\n\n` +
-    `One resume, many targeted views — one URL per company/role/year, no separate PDFs.`
+    `1. ASK me: "Do you have a job description? Paste it and I'll create a tailored version."\n` +
+    `2. ASK me: "Which audience? Specific company (e.g. OpenAI), role (e.g. designer, ML), language (en/zh), or a combination?"\n` +
+    `3. Call list_variants to show existing variants and offer them as a starting base.\n` +
+    `4. Rewrite bullets and descriptions based on the JD and target audience.\n` +
+    `5. Store as a variant using set_variant, e.g. audience key "openai".\n` +
+    `6. Tell me the shareable URL, e.g. "Your OpenAI resume is at cv.ha7ch.com/<me>?company=openai — send that when applying."\n\n` +
+    `One resume, many targeted variants — one URL per company/role/language, no separate PDFs.`
   );
 }
 
@@ -360,16 +363,25 @@ export default function RegisterFlow() {
         </Tabs>
       </div>
 
-      {/* Live page link — only after successful registration */}
+      {/* Links — only after successful registration */}
       {result && (
-        <Link
-          href={`/${result.handle}`}
-          target="_blank"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          cv.ha7ch.com/{result.handle}
-          <ExternalLink className="h-3.5 w-3.5" />
-        </Link>
+        <div className="flex flex-wrap gap-x-6 gap-y-2">
+          <Link
+            href={`/${result.handle}`}
+            target="_blank"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            cv.ha7ch.com/{result.handle}
+            <ExternalLink className="h-3.5 w-3.5" />
+          </Link>
+          <Link
+            href={`/${result.handle}/dashboard`}
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Dashboard
+            <ExternalLink className="h-3.5 w-3.5" />
+          </Link>
+        </div>
       )}
     </div>
   );
