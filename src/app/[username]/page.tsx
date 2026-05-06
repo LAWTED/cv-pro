@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import ResumeTemplate from "@/components/resume/ResumeTemplate";
 import ResumeView from "@/components/resume/ResumeView";
-import { getResumeByUsername } from "@/lib/resume-store";
+import { getResumeByUsername, getVariantByAudience } from "@/lib/resume-store";
 import { applyResumeFilters } from "@/lib/resume-filter";
 import type { ResumeData } from "@/types/resume";
 
@@ -96,6 +96,25 @@ function buildPersonSchema(resume: ResumeData) {
   };
 }
 
+function renderResume(resume: ResumeData) {
+  const schema = buildPersonSchema(resume);
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(schema).replace(/</g, "\\u003c"),
+        }}
+      />
+      <Suspense fallback={<ResumeTemplate data={resume} />}>
+        <ResumeView data={resume} />
+      </Suspense>
+    </>
+  );
+}
+
+const VARIANT_PARAM_ORDER = ["company", "role", "focus", "lang"] as const;
+
 export default async function UserResumePage({
   params,
   searchParams,
@@ -109,20 +128,16 @@ export default async function UserResumePage({
   if (!resume) notFound();
 
   const url = searchParamsToURLSearchParams(sp);
-  const result = applyResumeFilters(resume, url);
 
-  const schema = buildPersonSchema(result.resume);
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify(schema).replace(/</g, "\\u003c"),
-        }}
-      />
-      <Suspense fallback={<ResumeTemplate data={result.resume} />}>
-        <ResumeView data={result.resume} />
-      </Suspense>
-    </>
-  );
+  for (const key of VARIANT_PARAM_ORDER) {
+    const val = url.get(key);
+    if (!val) continue;
+    const variant = await getVariantByAudience(username, val);
+    if (variant) {
+      return renderResume(variant);
+    }
+  }
+
+  const result = applyResumeFilters(resume, url);
+  return renderResume(result.resume);
 }
