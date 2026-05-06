@@ -363,25 +363,41 @@ export default function RegisterFlow() {
         </Tabs>
       </div>
 
-      {/* Links — only after successful registration */}
-      {result && (
-        <div className="flex flex-wrap gap-x-6 gap-y-2">
-          <Link
-            href={`/${result.handle}`}
-            target="_blank"
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            cv.ha7ch.com/{result.handle}
-            <ExternalLink className="h-3.5 w-3.5" />
-          </Link>
+      {/* Step 4 - Dashboard */}
+      <div className="space-y-2">
+        <h3 className="font-serif text-2xl tracking-tight">
+          Step 4 · View your variants
+        </h3>
+        {result ? (
           <Link
             href={`/${result.handle}/dashboard`}
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="flex min-h-10 min-w-0 w-fit items-center gap-1 rounded-md border bg-muted px-3 py-2 text-base hover:brightness-95 transition-all"
           >
-            Dashboard
-            <ExternalLink className="h-3.5 w-3.5" />
+            <span className="select-none font-mono text-foreground">cv.ha7ch.com/</span>
+            <span className="font-mono text-foreground">{result.handle}/dashboard</span>
+            <ExternalLink className="ml-2 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
           </Link>
-        </div>
+        ) : (
+          <div className="flex min-h-10 min-w-0 w-fit items-center gap-1 rounded-md border bg-muted px-3 py-2 text-base opacity-50 cursor-not-allowed select-none">
+            <span className="font-mono text-foreground">cv.ha7ch.com/</span>
+            <span className="font-mono text-muted-foreground">yourname/dashboard</span>
+          </div>
+        )}
+        <p className="text-xs text-muted-foreground">
+          See all your targeted variants and their shareable links.
+        </p>
+      </div>
+
+      {/* Live page link */}
+      {result && (
+        <Link
+          href={`/${result.handle}`}
+          target="_blank"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+        >
+          cv.ha7ch.com/{result.handle}
+          <ExternalLink className="h-3.5 w-3.5" />
+        </Link>
       )}
     </div>
   );
