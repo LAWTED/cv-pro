@@ -129,3 +129,21 @@
     @apply font-sans;
   }
 }
+
+@keyframes progress-stripes {
+  from { background-position: 1rem 0; }
+  to   { background-position: 0 0; }
+}
+
+.progress-bar-fill {
+  background-color: oklch(0.145 0 0);
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 6px,
+    rgba(255,255,255,0.15) 6px,
+    rgba(255,255,255,0.15) 12px
+  );
+  background-size: 1rem 1rem;
+  animation: progress-stripes 0.8s linear infinite;
+}

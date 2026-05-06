@@ -1,7 +1,7 @@
 import RegisterFlow from "@/components/RegisterFlow";
 import { TextLoop } from "@/components/core/text-loop";
 
-const FUNDING_RAISED = 0.20;
+const FUNDING_RAISED = 100.20;
 const FUNDING_TARGET = 2500.20;
 
 export default function Home() {
@@ -63,7 +63,7 @@ export default function Home() {
           aria-valuemax={100}
         >
           <div
-            className="h-full bg-foreground transition-[width] duration-700 ease-out"
+            className="h-full progress-bar-fill transition-[width] duration-700 ease-out"
             style={{ width: `${fundingPercent}%` }}
           />
         </div>
