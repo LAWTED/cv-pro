@@ -21,6 +21,11 @@ const MCP_CLIENTS: { id: McpClient; label: string; icon: string }[] = [
 
 const MCP_URL = "https://cv.ha7ch.com/api/mcp";
 
+// Placeholder shown in Step 2/3 before the user has registered. The
+// `cv_pat_` prefix matches real tokens so the format is recognizable;
+// the asterisks make it obvious this is a preview, not a usable token.
+const PLACEHOLDER_TOKEN = "cv_pat_********************************";
+
 function cursorDeeplink(token: string): string {
   const config = btoa(
     JSON.stringify({
@@ -57,6 +62,18 @@ function mcpJson(token: string): string {
     },
     null,
     2,
+  );
+}
+
+function buildCliPrompt(token: string): string {
+  return (
+    `Update my resume at cv.ha7ch.com.\n\n` +
+    `Run first: npx cv-pro@latest login ${token}\n\n` +
+    `Then update based on whatever I provide — PDF, pasted text, or described changes. ` +
+    `Run npx cv-pro@latest --help if needed. Ask if unclear.\n\n` +
+    `After saving, ASK me whether to tag any entries for a specific company or role. ` +
+    `Tags enable shareable URLs like cv.ha7ch.com/<me>?for=openai or ?role=designer ` +
+    `instead of maintaining separate PDFs per audience.`
   );
 }
 
@@ -145,66 +162,144 @@ export default function RegisterFlow() {
     setTimeout(() => setCopied(null), 1500);
   }
 
-  if (result) {
-    const cliPrompt =
-      `Update my resume at cv.ha7ch.com.\n\n` +
-      `Run first: npx cv-pro@latest login ${result.token}\n\n` +
-      `Then update based on whatever I provide — PDF, pasted text, or described changes. ` +
-      `Run npx cv-pro@latest --help if needed. Ask if unclear.\n\n` +
-      `After saving, ASK me whether to tag any entries for a specific company or role. ` +
-      `Tags enable shareable URLs like cv.ha7ch.com/<me>?for=openai or ?role=designer ` +
-      `instead of maintaining separate PDFs per audience.`;
+  const tokenDisplay = result?.token ?? PLACEHOLDER_TOKEN;
+  const cliPrompt = buildCliPrompt(tokenDisplay);
 
-    const clientSelector = (
-      <div className="flex items-center gap-0.5">
-        {MCP_CLIENTS.map(({ id, label, icon }) => (
-          <button
-            key={id}
-            onClick={() => setMcpClient(id)}
-            className={cn(
-              "flex h-6 w-6 items-center justify-center rounded-md transition-colors",
-              mcpClient === id
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:bg-background/60 hover:text-foreground",
-            )}
-            title={label}
-            aria-label={label}
-          >
-            <img src={icon} alt="" className="size-3" />
-          </button>
-        ))}
-      </div>
-    );
+  const clientSelector = (
+    <div className="flex items-center gap-0.5">
+      {MCP_CLIENTS.map(({ id, label, icon }) => (
+        <button
+          key={id}
+          onClick={() => setMcpClient(id)}
+          className={cn(
+            "flex h-6 w-6 items-center justify-center rounded-md transition-colors",
+            mcpClient === id
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:bg-background/60 hover:text-foreground",
+          )}
+          title={label}
+          aria-label={label}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={icon} alt="" className="size-3" />
+        </button>
+      ))}
+    </div>
+  );
 
-    return (
-      <div className="space-y-6">
-        {/* Claimed handle */}
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">
-            <span className="font-medium text-foreground">cv.ha7ch.com/{result.handle}</span>{" "}
-            is yours
-          </span>
-          <button
-            onClick={() => { try { localStorage.removeItem(LS_KEY); } catch {} setResult(null); setHandle(""); }}
-            className="text-xs text-muted-foreground hover:text-foreground"
-          >
-            switch account
-          </button>
-        </div>
-
-        {/* Step 2 - Token */}
+  return (
+    <div className="space-y-6">
+      {/* Step 1 */}
+      {result ? (
         <div className="space-y-2">
-          <h3 className="font-serif text-2xl tracking-tight">
-            Step 2 · Save your token
-          </h3>
-          <CodeBlock value={result.token} id="token" copied={copied} onCopy={copy} />
+          <h2 className="font-serif text-2xl tracking-tight">
+            Step 1 · Create your online CV
+          </h2>
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">
+              <span className="font-medium text-foreground">cv.ha7ch.com/{result.handle}</span>{" "}
+              is yours
+            </span>
+            <button
+              onClick={() => {
+                try { localStorage.removeItem(LS_KEY); } catch {}
+                setResult(null);
+                setHandle("");
+              }}
+              className="text-xs text-muted-foreground hover:text-foreground"
+            >
+              switch account
+            </button>
+          </div>
         </div>
+      ) : (
+        <form onSubmit={submit} className="space-y-4">
+          <h2 className="font-serif text-2xl tracking-tight">
+            Step 1 · Create your online CV
+          </h2>
 
-        {/* Step 3 - Tabs */}
-        <div className="space-y-3">
-          <h3 className="font-serif text-2xl tracking-tight">
-            Step 3 · Update your resume
-          </h3>
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <div className="flex h-9 flex-1 items-center gap-1 rounded-md border border-input bg-background px-3 text-sm transition focus-within:border-foreground/40 focus-within:ring-2 focus-within:ring-ring/30">
+                <span className="select-none font-mono text-muted-foreground">
+                  cv.ha7ch.com/
+                </span>
+                <input
+                  type="text"
+                  value={handle}
+                  onChange={(e) => {
+                    setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""));
+                    setError("");
+                    setTakenHandle(null);
+                    setTokenError("");
+                  }}
+                  placeholder="yourname"
+                  maxLength={30}
+                  required
+                  autoFocus
+                  className="flex-1 bg-transparent font-mono outline-none placeholder:text-muted-foreground/60"
+                />
+              </div>
+              <Button type="submit" disabled={loading || !handle}>
+                {loading ? "…" : "Get token →"}
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Choose a username for your page.
+            </p>
+          </div>
+
+          {error && <p className="text-sm text-destructive">{error}</p>}
+          {takenHandle && (
+            <div className="space-y-2 pt-2">
+              <p className="text-sm text-muted-foreground">
+                If it&apos;s yours, paste your token to log back in.
+              </p>
+              <div className="flex gap-2">
+                <Input
+                  value={token}
+                  onChange={(e) => { setToken(e.target.value); setTokenError(""); }}
+                  placeholder="cv_pat_..."
+                  className="font-mono"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      loginWithToken();
+                    }
+                  }}
+                />
+                <Button
+                  type="button"
+                  onClick={() => loginWithToken()}
+                  disabled={tokenLoading || !token.trim()}
+                >
+                  {tokenLoading ? "…" : "Log in →"}
+                </Button>
+              </div>
+              {tokenError && <p className="text-sm text-destructive">{tokenError}</p>}
+            </div>
+          )}
+        </form>
+      )}
+
+      {/* Step 2 - Save your token */}
+      <div className="space-y-2">
+        <h3 className="font-serif text-2xl tracking-tight">
+          Step 2 · Save your token
+        </h3>
+        <CodeBlock value={tokenDisplay} id="token" copied={copied} onCopy={copy} />
+        {!result && (
+          <p className="text-xs text-muted-foreground">
+            Your real token appears here after Step 1.
+          </p>
+        )}
+      </div>
+
+      {/* Step 3 - Update your resume */}
+      <div className="space-y-3">
+        <h3 className="font-serif text-2xl tracking-tight">
+          Step 3 · Update your resume
+        </h3>
         <Tabs defaultValue="cli">
           <TabsList className="w-fit">
             <TabsTrigger value="cli">CLI</TabsTrigger>
@@ -221,11 +316,12 @@ export default function RegisterFlow() {
           </TabsContent>
 
           <TabsContent value="mcp" className="mt-4 space-y-2">
-            {mcpClient === "cursor" && (
+            {result && mcpClient === "cursor" && (
               <a
                 href={cursorDeeplink(result.token)}
                 className="inline-flex items-center gap-2 rounded-md bg-foreground px-4 py-2 text-sm font-medium text-background transition-colors hover:bg-foreground/90"
               >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={MCP_CLIENTS[1].icon} alt="" className="size-4 invert" />
                 Add to Cursor
               </a>
@@ -233,10 +329,10 @@ export default function RegisterFlow() {
             <CodeBlock
               value={
                 mcpClient === "claude"
-                  ? claudeCommand(result.token)
+                  ? claudeCommand(tokenDisplay)
                   : mcpClient === "codex"
-                    ? codexCommand(result.token)
-                    : mcpJson(result.token)
+                    ? codexCommand(tokenDisplay)
+                    : mcpJson(tokenDisplay)
               }
               id={`mcp-${mcpClient}`}
               copied={copied}
@@ -250,9 +346,10 @@ export default function RegisterFlow() {
             </p>
           </TabsContent>
         </Tabs>
-        </div>
+      </div>
 
-        {/* Live page */}
+      {/* Live page link — only after successful registration */}
+      {result && (
         <Link
           href={`/${result.handle}`}
           target="_blank"
@@ -261,78 +358,8 @@ export default function RegisterFlow() {
           cv.ha7ch.com/{result.handle}
           <ExternalLink className="h-3.5 w-3.5" />
         </Link>
-      </div>
-    );
-  }
-
-  return (
-    <form onSubmit={submit} className="space-y-4">
-      <h2 className="font-serif text-2xl tracking-tight">
-        Step 1 · Create your account
-      </h2>
-
-      <div className="space-y-2">
-        <div className="flex items-center gap-2">
-          <div className="flex h-9 flex-1 items-center gap-1 rounded-md border border-input bg-background px-3 text-sm transition focus-within:border-foreground/40 focus-within:ring-2 focus-within:ring-ring/30">
-            <span className="select-none font-mono text-muted-foreground">
-              cv.ha7ch.com/
-            </span>
-            <input
-              type="text"
-              value={handle}
-              onChange={(e) => {
-                setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ""));
-                setError("");
-                setTakenHandle(null);
-                setTokenError("");
-              }}
-              placeholder="yourname"
-              maxLength={30}
-              required
-              autoFocus
-              className="flex-1 bg-transparent font-mono outline-none placeholder:text-muted-foreground/60"
-            />
-          </div>
-          <Button type="submit" disabled={loading || !handle}>
-            {loading ? "…" : "Get token →"}
-          </Button>
-        </div>
-        <p className="text-xs text-muted-foreground">
-          Choose a username for your page.
-        </p>
-      </div>
-
-      {error && <p className="text-sm text-destructive">{error}</p>}
-      {takenHandle && (
-        <div className="space-y-2 pt-2">
-          <p className="text-sm text-muted-foreground">
-            If it&apos;s yours, paste your token to log back in.
-          </p>
-          <div className="flex gap-2">
-            <Input
-              value={token}
-              onChange={(e) => { setToken(e.target.value); setTokenError(""); }}
-              placeholder="cv_pat_..."
-              className="font-mono"
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  loginWithToken();
-                }
-              }}
-            />
-            <Button
-              type="button"
-              onClick={() => loginWithToken()}
-              disabled={tokenLoading || !token.trim()}
-            >
-              {tokenLoading ? "…" : "Log in →"}
-            </Button>
-          </div>
-          {tokenError && <p className="text-sm text-destructive">{tokenError}</p>}
-        </div>
       )}
-    </form>
+    </div>
   );
 }
 
