@@ -1,5 +1,5 @@
 import "server-only";
-import { revalidatePath, unstable_cache } from "next/cache";
+import { cacheLife, cacheTag, revalidatePath, revalidateTag } from "next/cache";
 import { z } from "zod";
 import { supabaseAnon } from "@/lib/supabase/client";
 import {
@@ -15,25 +15,24 @@ import {
   workExperienceSchema,
 } from "@/types/resume";
 
-export const getResumeByUsername = unstable_cache(
-  async (username: string): Promise<ResumeData | null> => {
-    try {
-      const { data, error } = await supabaseAnon
-        .from("cv_resumes")
-        .select("data")
-        .eq("username", username)
-        .maybeSingle();
+export async function getResumeByUsername(username: string): Promise<ResumeData | null> {
+  "use cache";
+  cacheTag("resume", username);
+  cacheLife("hours");
+  try {
+    const { data, error } = await supabaseAnon
+      .from("cv_resumes")
+      .select("data")
+      .eq("username", username)
+      .maybeSingle();
 
-      if (error) console.warn("[resume-store] read failed:", error.message);
-      if (data?.data) return normalizeResume(data.data, username);
-    } catch (err) {
-      console.warn("[resume-store] unreachable:", err);
-    }
-    return null;
-  },
-  ["resume-by-username"],
-  { revalidate: 300 },
-);
+    if (error) console.warn("[resume-store] read failed:", error.message);
+    if (data?.data) return normalizeResume(data.data, username);
+  } catch (err) {
+    console.warn("[resume-store] unreachable:", err);
+  }
+  return null;
+}
 
 export async function upsertResume(data: ResumeData): Promise<ResumeData> {
   const next: ResumeData = {
@@ -47,8 +46,71 @@ export async function upsertResume(data: ResumeData): Promise<ResumeData> {
   );
   if (error) throw new Error(`upsertResume failed: ${error.message}`);
 
+  revalidateTag("resume", data.username);
   revalidatePath(`/${data.username}`);
   return next;
+}
+
+export async function getVariantByAudience(username: string, audience: string): Promise<ResumeData | null> {
+  "use cache";
+  cacheTag("variant", `${username}:${audience}`);
+  cacheLife("hours");
+  try {
+    const { data, error } = await supabaseAnon
+      .from("cv_variants")
+      .select("data")
+      .eq("username", username)
+      .eq("audience", audience)
+      .maybeSingle();
+
+    if (error) console.warn("[resume-store] variant read failed:", error.message);
+    if (data?.data) return normalizeResume(data.data, username);
+  } catch (err) {
+    console.warn("[resume-store] variant unreachable:", err);
+  }
+  return null;
+}
+
+export async function upsertVariant(username: string, audience: string, data: ResumeData): Promise<ResumeData> {
+  const next: ResumeData = {
+    ...data,
+    meta: { updatedAt: new Date().toISOString() },
+  };
+
+  const { error } = await supabaseAnon.from("cv_variants").upsert(
+    { username, audience, data: next, updated_at: next.meta.updatedAt },
+    { onConflict: "username,audience" },
+  );
+  if (error) throw new Error(`upsertVariant failed: ${error.message}`);
+
+  revalidateTag("variant", `${username}:${audience}`);
+  revalidatePath(`/${username}`);
+  return next;
+}
+
+export async function deleteVariant(username: string, audience: string): Promise<void> {
+  const { error } = await supabaseAnon
+    .from("cv_variants")
+    .delete()
+    .eq("username", username)
+    .eq("audience", audience);
+
+  if (error) throw new Error(`deleteVariant failed: ${error.message}`);
+
+  revalidateTag("variant", `${username}:${audience}`);
+  revalidatePath(`/${username}`);
+}
+
+export async function listVariants(username: string): Promise<{ audience: string; updatedAt: string }[]> {
+  const { data, error } = await supabaseAnon
+    .from("cv_variants")
+    .select("audience, updated_at")
+    .eq("username", username)
+    .order("updated_at", { ascending: false });
+
+  if (error) throw new Error(`listVariants failed: ${error.message}`);
+
+  return (data ?? []).map((row) => ({ audience: row.audience, updatedAt: row.updated_at }));
 }
 
 // Render-side defense: coerces malformed DB rows into a renderable shape so the
