@@ -256,11 +256,11 @@ export default function RegisterFlow() {
             </p>
           </div>
 
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && !takenHandle && <p className="text-sm text-destructive">{error}</p>}
           {takenHandle && (
-            <div className="space-y-2 pt-2">
+            <div className="space-y-3 pt-1">
               <p className="text-sm text-muted-foreground">
-                If it&apos;s yours, paste your token to log back in.
+                <span className="font-mono">@{takenHandle}</span> is taken — yours? Paste your token to log back in.
               </p>
               <div className="flex gap-2">
                 <Input
