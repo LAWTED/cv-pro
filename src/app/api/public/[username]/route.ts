@@ -35,7 +35,9 @@ export async function GET(
   }
 
   const query = req.nextUrl.searchParams;
-  const paramValues = VARIANT_PARAM_ORDER.map((k) => query.get(k)).filter(Boolean) as string[];
+  const paramValues = VARIANT_PARAM_ORDER.map((k) => query.get(k)).filter(
+    (value): value is string => typeof value === "string" && value.length > 0,
+  );
   const variant = await resolveVariant(username, paramValues);
   const output = variant ?? applyResumeFilters(resume, query).resume;
 
