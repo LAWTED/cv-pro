@@ -4,8 +4,8 @@ import { getResumeByUsername, getVariantsForAudiences } from "@/lib/resume-store
 import type { ResumeData } from "@/types/resume";
 
 type RouteParams = { username: string };
-// Precedence is company > role > focus > lang because the broadest/highest-intent audience
-// hint should win before less-specific refinements when multiple params are present.
+// Precedence is company > role > focus > lang because links are typically shared with
+// company targeting first, then role/focus/language as narrower fallback hints.
 const VARIANT_PARAM_ORDER = ["company", "role", "focus", "lang"] as const;
 
 /**
@@ -13,7 +13,7 @@ const VARIANT_PARAM_ORDER = ["company", "role", "focus", "lang"] as const;
  * 1) compound key built from all present params in VARIANT_PARAM_ORDER
  * 2) each individual param in VARIANT_PARAM_ORDER
  *
- * variantValues must be the ordered query values extracted by VARIANT_PARAM_ORDER.
+ * variantValues must be non-empty query values in VARIANT_PARAM_ORDER sequence.
  */
 async function resolveVariant(username: string, variantValues: string[]): Promise<ResumeData | null> {
   if (variantValues.length === 0) return null;

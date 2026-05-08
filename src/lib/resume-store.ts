@@ -76,16 +76,16 @@ export async function getVariantsForAudiences(
   audiences: string[],
 ): Promise<Map<string, ResumeData>> {
   "use cache";
-  const unique = [...new Set(audiences.filter((value) => value.length > 0))];
-  if (unique.length === 0) return new Map();
-  for (const audience of unique) cacheTag("variant", `${username}:${audience}`);
+  const uniqueAudiences = [...new Set(audiences.filter((value) => value.length > 0))];
+  if (uniqueAudiences.length === 0) return new Map();
+  for (const audience of uniqueAudiences) cacheTag("variant", `${username}:${audience}`);
   cacheLife("hours");
   try {
     const { data, error } = await supabaseAnon
       .from("cv_variants")
       .select("audience, data")
       .eq("username", username)
-      .in("audience", unique);
+      .in("audience", uniqueAudiences);
 
     if (error) console.warn("[resume-store] variants read failed:", error.message);
 
