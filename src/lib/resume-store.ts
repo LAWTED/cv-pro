@@ -71,7 +71,7 @@ export async function getVariantByAudience(username: string, audience: string): 
   return null;
 }
 
-export async function getVariantsByAudiences(
+export async function getVariantsForAudiences(
   username: string,
   audiences: string[],
 ): Promise<Map<string, ResumeData>> {

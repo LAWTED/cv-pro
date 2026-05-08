@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { applyResumeFilters } from "@/lib/resume-filter";
-import { getResumeByUsername, getVariantsByAudiences } from "@/lib/resume-store";
+import { getResumeByUsername, getVariantsForAudiences } from "@/lib/resume-store";
+import type { ResumeData } from "@/types/resume";
 
 type RouteParams = { username: string };
 // Higher-priority query keys come first; this order controls fallback matching.
@@ -11,19 +12,19 @@ const VARIANT_PARAM_ORDER = ["company", "role", "focus", "lang"] as const;
  * 1) compound key built from all present params in VARIANT_PARAM_ORDER
  * 2) each individual param in VARIANT_PARAM_ORDER
  *
- * variantParamValues must be the ordered query values extracted by VARIANT_PARAM_ORDER.
+ * variantValues must be the ordered query values extracted by VARIANT_PARAM_ORDER.
  */
-async function resolveVariant(username: string, variantParamValues: string[]) {
-  if (variantParamValues.length === 0) return null;
+async function resolveVariant(username: string, variantValues: string[]): Promise<ResumeData | null> {
+  if (variantValues.length === 0) return null;
   // Matches stored audience keys such as "company-role-focus" when multiple params are present.
-  const compoundKey = variantParamValues.length > 1 ? variantParamValues.join("-") : null;
-  const candidates = compoundKey ? [compoundKey, ...variantParamValues] : variantParamValues;
-  const variants = await getVariantsByAudiences(username, candidates);
+  const compoundKey = variantValues.length > 1 ? variantValues.join("-") : null;
+  const candidates = compoundKey ? [compoundKey, ...variantValues] : variantValues;
+  const variants = await getVariantsForAudiences(username, candidates);
   if (compoundKey) {
     const compound = variants.get(compoundKey);
     if (compound) return compound;
   }
-  for (const value of variantParamValues) {
+  for (const value of variantValues) {
     const variant = variants.get(value);
     if (variant) return variant;
   }
@@ -44,10 +45,10 @@ export async function GET(
   }
 
   const query = req.nextUrl.searchParams;
-  const variantParamValues = VARIANT_PARAM_ORDER.map((k) => query.get(k)).filter(
+  const variantValues = VARIANT_PARAM_ORDER.map((k) => query.get(k)).filter(
     (value): value is string => value !== null && value.length > 0,
   );
-  const variant = await resolveVariant(username, variantParamValues);
+  const variant = await resolveVariant(username, variantValues);
   // Variants are pre-tailored payloads; only the base resume uses runtime tag filtering.
   const output = variant ?? applyResumeFilters(resume, query).resume;
 
