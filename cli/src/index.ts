@@ -163,7 +163,7 @@ async function main() {
   }
 
   if (cmd === "get") {
-    const variantArg = args.slice(1).find(arg => arg.startsWith("--variant="));
+    const variantArg = args.find(arg => arg.startsWith("--variant="));
     const variantKey = variantArg?.slice("--variant=".length);
     const data = variantKey ? await getVariant(config, variantKey) : await getResume(config);
     console.log(JSON.stringify(data, null, 2));
