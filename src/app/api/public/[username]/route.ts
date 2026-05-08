@@ -4,7 +4,7 @@ import { getResumeByUsername, getVariantsForAudiences } from "@/lib/resume-store
 import type { ResumeData } from "@/types/resume";
 
 type RouteParams = { username: string };
-// Higher-priority query keys come first; this order controls fallback matching.
+// Precedence is company > role > focus > lang to prefer the most targeted audience match first.
 const VARIANT_PARAM_ORDER = ["company", "role", "focus", "lang"] as const;
 
 /**
