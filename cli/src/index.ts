@@ -4,6 +4,7 @@ import { loadConfig, saveConfig, clearConfig, DEFAULT_API } from "./config.js";
 import { register, whoami, getResume, putResume, patchSection, getSchema, listVariants, getVariant, putVariant, deleteVariant } from "./api.js";
 
 const VERSION = "0.5.0";
+const VARIANT_FLAG = "--variant=";
 
 function printVariantReminder(apiBase: string, handle: string | undefined) {
   if (!handle) return;
@@ -163,8 +164,8 @@ async function main() {
   }
 
   if (cmd === "get") {
-    const variantArg = args.find(arg => arg.startsWith("--variant="));
-    const variantKey = variantArg?.slice("--variant=".length);
+    const variantArg = args.find((arg) => arg.startsWith(VARIANT_FLAG));
+    const variantKey = variantArg?.slice(VARIANT_FLAG.length);
     const data = variantKey ? await getVariant(config, variantKey) : await getResume(config);
     console.log(JSON.stringify(data, null, 2));
     return;
@@ -194,8 +195,8 @@ async function main() {
 
   if (cmd === "open") {
     const wantJson = args.slice(1).includes("--json");
-    const variantArg = args.slice(1).find(a => a.startsWith("--variant="));
-    const variantKey = variantArg?.slice("--variant=".length);
+    const variantArg = args.slice(1).find((arg) => arg.startsWith(VARIANT_FLAG));
+    const variantKey = variantArg?.slice(VARIANT_FLAG.length);
 
     let url: string;
     if (variantKey) {
